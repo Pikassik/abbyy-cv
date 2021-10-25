@@ -9,11 +9,9 @@ Mat VNGdemosaicing(const Mat& input) {
   std::vector<Mat> BGRin(3);
   split(input, BGRin);
   Mat in_sum = BGRin[0] + BGRin[1] + BGRin[2];
-  cout << in_sum.rows << " " << in_sum.cols << std::endl;
   Mat output = Mat::zeros(input.size(), CV_8UC3);
   std::vector<Mat> BGRout(3);
   split(output, BGRout);
-  std::cout << in_sum.size() << output.size() << std::endl;
   auto get = [&](int i, int j) -> uchar {
     if ((i >= 0) && (i < in_sum.rows) && (j >= 0) && (j < in_sum.cols)) {
       return in_sum.at<uchar>(i, j);
@@ -239,36 +237,25 @@ Mat VNGdemosaicing(const Mat& input) {
   return output;
 }
 
-int main() {
+int main(int argc, char** argv) {
   using namespace cv;
   using namespace std::chrono;
-  Mat image = imread("../zadanie1/RGB_CFA.bmp");
+  if (argc < 2) {
+    std::cout << "usage: <bin> <path to CFA>" << std::endl;
+    std::terminate();
+  }
+  Mat image = imread(argv[1]);
   if (image.empty())
   {
     std::cout << "Could not open or find the image" << std::endl;
     return -1;
   }
-//  std::vector<Mat> BGR;
-//  split(image, BGR); // merge to reverse split
-//  Mat output = Mat::zeros(image.size(), CV_8UC3);
+
   auto start = steady_clock::now();
   Mat output_image = VNGdemosaicing(image);
   auto end = steady_clock::now();
   auto duration = duration_cast<milliseconds>(end - start);
   std::cout << "transformed in " << duration.count() << " ms" << std::endl;
   imwrite("output.bmp", output_image);
-//  String windowName = "VNG"; //Name of the window
-//
-//  namedWindow(windowName); // Create a window
-//
-//  imshow(windowName, output_image); // Show our image inside the created window.
-//
-//  waitKey(0); // Wait for any keystroke in the window
-//
-//  destroyWindow(windowName); //destroy the created window
-//  std::cout << "Hello, World!" << std::endl;
-//  std::cout << image.size() << std::endl;
-//  std::cout << image.channels() << std::endl;
-//  std::cout << (int)BGR[0].at<uint8_t>(1, 1) << std::endl;
   return 0;
 }
